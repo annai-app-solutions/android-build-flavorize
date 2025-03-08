@@ -1,5 +1,7 @@
 import java.util.Properties
 import java.io.FileInputStream
+import java.nio.file.Files
+import java.nio.file.Paths
 
 val rootDir = "../../"
 
@@ -23,6 +25,7 @@ plugins {
 
 group = "com.annaibrands.studio"
 version = "1.0.0"
+
 
 repositories {
     mavenCentral()
@@ -56,9 +59,9 @@ publishing {
     publications {
         withType<MavenPublication> {
             //from(components["java"])
-            groupId = "com.annaibrands.studio"
+            groupId = project.group.toString()
             artifactId = "flavorize"
-            version = "1.0.0"
+            version = project.version.toString()
 
             pom {
                 name.set("Android Build Flavorize Plugin")
@@ -91,8 +94,6 @@ publishing {
 
     repositories {
 
-        //mavenLocal()
-
         // ✅ Local Maven Repository for Testing
         //maven {
             //name = "localMaven"
@@ -118,8 +119,32 @@ signing {
 
     if (!signingKey.isNullOrEmpty() && !signingPassword.isNullOrEmpty()) {
         useInMemoryPgpKeys(signingKey, signingPassword)
-        sign(publishing.publications["maven"])
+        publishing.publications.withType<MavenPublication>().configureEach {
+            sign(this)
+        }
     } else {
         println("⚠️ Signing skipped: GPG keys not found in gradle.properties")
     }
+}
+
+tasks.register("cleanMavenLocal") {
+    group = "publishing"
+    description = "Removes existing artifacts from ~/.m2/repository before publishing"
+
+    doLast {
+        val groupPath = project.group.toString().replace(".", "/")
+        val localMavenPath = Paths.get(System.getProperty("user.home"), ".m2", "repository", groupPath)
+
+        if (Files.exists(localMavenPath)) {
+            println("🧹 Removing old artifacts from $localMavenPath")
+            localMavenPath.toFile().deleteRecursively()
+        } else {
+            println("✅ No existing artifacts found in $localMavenPath")
+        }
+    }
+}
+
+// Ensure `cleanMavenLocal` runs **before** publishing
+tasks.named("publishToMavenLocal").configure {
+    dependsOn("cleanMavenLocal")
 }
