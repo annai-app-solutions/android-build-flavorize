@@ -21,6 +21,7 @@ plugins {
     `java-gradle-plugin`  // Required for creating Gradle plugins
     `maven-publish`       // For publishing to Maven repositories
     signing               // Required for Maven Central publishing
+    id("java-gradle-plugin")
 }
 
 group = "com.annaibrands.studio"
@@ -28,6 +29,7 @@ version = "1.0.0"
 
 
 repositories {
+    google()
     mavenCentral()
 }
 
@@ -35,6 +37,8 @@ dependencies {
     implementation(gradleApi())
     implementation(localGroovy())
     testImplementation(kotlin("test"))
+    implementation("com.android.tools.build:gradle:8.1.1")
+    implementation("org.yaml:snakeyaml:2.0")
 }
 
 gradlePlugin {

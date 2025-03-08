@@ -1,14 +1,16 @@
 package com.annai.flavorize
 
+import com.annai.flavorize.spec.AnnaiSpecUtil
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
+import com.annai.flavorize.utils.*
 
 // ✅ Pre-Build Task
 abstract class PreBuildProcessingTask : DefaultTask() {
 
-    @Internal // 🔹 Tells Gradle to ignore this field for up-to-date checks
-    var variantName: String = "Unknown-Unknown"
+    @Internal
+    lateinit var specUtil: AnnaiSpecUtil
 
     init {
         group = "build"
@@ -17,7 +19,11 @@ abstract class PreBuildProcessingTask : DefaultTask() {
 
     @TaskAction
     fun executePreBuild() {
-        val (flavor, buildType) = variantName.split("-")
-        println("⚙️ Pre-Build Processing: Flavor = $flavor, Build Type = $buildType")
+
+        println("⚙️ $pluginName Pre-Build Processing: Started...")
+
+        specUtil.determineCurrentFlavor()
+
+        specUtil.printFlavorInfo()
     }
 }

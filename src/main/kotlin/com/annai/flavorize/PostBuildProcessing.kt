@@ -1,10 +1,17 @@
 package com.annai.flavorize
 
+import com.annai.flavorize.spec.AnnaiSpecUtil
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
+import com.annai.flavorize.utils.*
+import org.gradle.api.tasks.Internal
 
 // ✅ Post-Build Task
 abstract class PostBuildProcessingTask : DefaultTask() {
+
+    @Internal
+    lateinit var specUtil: AnnaiSpecUtil
+
     init {
         group = "build"
         description = "Post-build processing task"
@@ -12,6 +19,6 @@ abstract class PostBuildProcessingTask : DefaultTask() {
 
     @TaskAction
     fun executePostBuild() {
-        println("✅ Post-Build Processing: Cleanup completed.")
+        println("✅ $pluginName Post-Build Processing: completed.")
     }
 }

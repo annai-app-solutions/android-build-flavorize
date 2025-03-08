@@ -1,44 +1,54 @@
 package com.annai.flavorize
 
+import com.annai.flavorize.spec.AnnaiSpecUtil
+import com.annai.flavorize.utils.capitalizeFirstChar // ✅ Import the utility function
+import com.android.build.gradle.AppExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import java.util.regex.Pattern
 
 class FlavorizePlugin : Plugin<Project> {
     override fun apply(project: Project) {
-        val preBuildTask = project.tasks.register("preBuildProcessing", PreBuildProcessingTask::class.java)
-        val postBuildTask = project.tasks.register("postBuildProcessing", PostBuildProcessingTask::class.java)
 
-        // ✅ Hook into task creation
-        project.tasks.configureEach { task ->
-            if (task.name.matches(Regex("(assemble|bundle|generate)\\w*(Release|Debug|Profile)"))) {
-                val variantName = extractFlavorAndBuildType(task.name)
+        val specUtil = AnnaiSpecUtil(project)
 
-                println("🔍 Extracted: Flavor = ${variantName.split("-")[0]}, BuildType = ${variantName.split("-")[1]}")
-                println("🔹 Configuring Variant: $variantName for Task: ${task.name}")
+        // ✅ Register AnnaiSpecUtil as an extension for Gradle scripts
+        project.extensions.add("annaiSpec", specUtil)
 
-                preBuildTask.configure { it.variantName = variantName }
+        // ✅ Also store AnnaiSpecUtil in rootProject.extra so it's accessible from scripts like `annai_post_build.gradle.kts`
+        val extraProperties = project.rootProject.extensions.extraProperties
+        extraProperties.set("annaiSpec", specUtil)
 
+        // ✅ Debugging: Print available extensions to ensure AnnaiSpecUtil is registered
+        //project.extensions.extensionsSchema.forEach {
+            //println("📢 Available Extension: ${it.name} -> ${it.publicType}")
+        //}
+
+        val android = project.extensions.findByType(AppExtension::class.java)
+
+        if (android == null) {
+            println("⚠️ Android Gradle Plugin not found! Make sure this plugin is applied in an Android project.")
+            return
+        }
+
+        android.applicationVariants.all { variant ->
+            val flavor = variant.flavorName?.capitalizeFirstChar() ?: "NoFlavor"
+            val buildType = variant.buildType.name.capitalizeFirstChar()
+            val variantName = "$flavor-$buildType"
+
+            val preBuildTask = project.tasks.register("preBuildProcessing${variant.name.capitalizeFirstChar()}", PreBuildProcessingTask::class.java) {
+                it.specUtil = specUtil
+            }
+
+            val postBuildTask = project.tasks.register("postBuildProcessing${variant.name.capitalizeFirstChar()}", PostBuildProcessingTask::class.java) {
+                it.specUtil = specUtil
+            }
+
+            project.tasks.matching { task ->
+                task.name.matches(Regex("(assemble|bundle|generate)${variant.name.capitalizeFirstChar()}"))
+            }.configureEach { task ->
                 task.dependsOn(preBuildTask)
                 task.finalizedBy(postBuildTask)
             }
-        }
-    }
-
-    private fun extractFlavorAndBuildType(taskName: String): String {
-        val pattern = Pattern.compile("(assemble|bundle|generate)([A-Z][a-zA-Z0-9]*)(Release|Debug|Profile)")
-        val matcher = pattern.matcher(taskName)
-
-        return if (matcher.find()) {
-            val flavor = matcher.group(2)?.takeIf { it.isNotBlank() } ?: "NoFlavor"
-            val buildType = matcher.group(3) ?: "Unknown"
-
-            // 🔹 Default to "Banking" if NoFlavor is detected
-            val finalFlavor = if (flavor == "NoFlavor") "Banking" else flavor
-
-            "$finalFlavor-$buildType"
-        } else {
-            "Banking-Debug"  // 🔹 Default to Banking-Debug if extraction fails
         }
     }
 }
