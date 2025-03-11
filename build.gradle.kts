@@ -4,10 +4,11 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 val rootDir = "../../"
+val annaiDataDir = "$rootDir/annai_app_data"
 
 // Load external gradle.properties (for Sonatype credentials & signing keys)
 val externalProperties = Properties()
-val externalPropertiesFile = file("$rootDir/annai_app_data/mavencentral/gradle.properties")
+val externalPropertiesFile = file("$annaiDataDir/keys/mavencentral/gradle.properties")
 
 if (externalPropertiesFile.exists()) {
     externalProperties.load(FileInputStream(externalPropertiesFile))
@@ -62,7 +63,6 @@ kotlin {
 publishing {
     publications {
         withType<MavenPublication> {
-            //from(components["java"])
             groupId = project.group.toString()
             artifactId = "flavorize"
             version = project.version.toString()
@@ -98,12 +98,6 @@ publishing {
 
     repositories {
 
-        // ✅ Local Maven Repository for Testing
-        //maven {
-            //name = "localMaven"
-            //url = uri("$rootDir/local-maven-repo")
-        //}
-
         // ✅ Maven Central Repository (Sonatype)
         maven {
             name = "MavenCentral"
@@ -118,16 +112,28 @@ publishing {
 
 // ✅ Signing Configuration (Only Sign if Keys Exist)
 signing {
-    val signingKey = findProperty("signingKey") as String?
+    val signingKeyFile = findProperty("signingKeyFile") as String?
     val signingPassword = findProperty("signingPassword") as String?
 
-    if (!signingKey.isNullOrEmpty() && !signingPassword.isNullOrEmpty()) {
+    if (!signingKeyFile.isNullOrEmpty() && !signingPassword.isNullOrEmpty()) {
+        var keyFile = file(signingKeyFile)
+
+        if (!keyFile.exists()) {
+            keyFile = file("$annaiDataDir/$signingKeyFile/")
+        }
+
+        if (!keyFile.exists()) {
+            throw GradleException("❌ Signing key file not found: $signingKeyFile")
+        }
+
+        val signingKey = keyFile.readText()
         useInMemoryPgpKeys(signingKey, signingPassword)
+
         publishing.publications.withType<MavenPublication>().configureEach {
             sign(this)
         }
     } else {
-        println("⚠️ Signing skipped: GPG keys not found in gradle.properties")
+        println("⚠️ Signing skipped: GPG key file or password missing in gradle.properties")
     }
 }
 
@@ -137,7 +143,8 @@ tasks.register("cleanMavenLocal") {
 
     doLast {
         val groupPath = project.group.toString().replace(".", "/")
-        val localMavenPath = Paths.get(System.getProperty("user.home"), ".m2", "repository", groupPath)
+        val localMavenPath = Paths.get(System.getProperty("user.home"),
+            ".m2", "repository", groupPath, "flavorize", project.version.toString())
 
         if (Files.exists(localMavenPath)) {
             println("🧹 Removing old artifacts from $localMavenPath")
