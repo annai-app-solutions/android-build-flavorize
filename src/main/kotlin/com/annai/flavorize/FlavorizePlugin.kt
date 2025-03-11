@@ -1,7 +1,7 @@
 package com.annai.flavorize
 
 import com.annai.flavorize.spec.AnnaiSpecUtil
-import com.annai.flavorize.utils.capitalizeFirstChar // ✅ Import the utility function
+import com.annai.flavorize.utils.capitalizeFirstChar
 import com.android.build.gradle.AppExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -30,10 +30,14 @@ class FlavorizePlugin : Plugin<Project> {
             return
         }
 
-        android.applicationVariants.all { variant ->
+         android.applicationVariants.all { variant ->
             val flavor = variant.flavorName?.capitalizeFirstChar() ?: "NoFlavor"
             val buildType = variant.buildType.name.capitalizeFirstChar()
             val variantName = "$flavor-$buildType"
+
+            val firebaseCopyTask = project.tasks.register("firebaseCopyProcessing${variant.name.capitalizeFirstChar()}", FirebaseCopyTask::class.java) {
+                it.specUtil = specUtil
+            }
 
             val preBuildTask = project.tasks.register("preBuildProcessing${variant.name.capitalizeFirstChar()}", PreBuildProcessingTask::class.java) {
                 it.specUtil = specUtil
@@ -43,12 +47,24 @@ class FlavorizePlugin : Plugin<Project> {
                 it.specUtil = specUtil
             }
 
+            // ✅ Ensure GoogleServices tasks depend on FirebaseCopyTask ONLY ONCE
+             project.tasks.matching { task ->
+                 task.name.matches(Regex("(process)${variant.name.capitalizeFirstChar()}(GoogleServices)"))
+             }.configureEach { task ->
+                    if (!task.dependsOn.contains(firebaseCopyTask)) {
+                        task.dependsOn(firebaseCopyTask)
+                        //println("📢 FirebaseCopyTask added before: ${task.name}")
+                    }
+                }
+
             project.tasks.matching { task ->
                 task.name.matches(Regex("(assemble|bundle|generate)${variant.name.capitalizeFirstChar()}"))
             }.configureEach { task ->
                 task.dependsOn(preBuildTask)
                 task.finalizedBy(postBuildTask)
+                //println("📢 Pre & Post build task added before: ${task.name}")
             }
         }
     }
+
 }

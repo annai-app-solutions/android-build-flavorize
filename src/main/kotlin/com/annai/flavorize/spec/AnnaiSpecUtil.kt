@@ -54,9 +54,61 @@ class AnnaiSpecUtil(private val project: Project) {
                 idSuffix = safeString(flavorData["id_suffix"]),
                 versionName = safeString(flavorData["version_name"] ?: defaults["version_name"]),
                 versionNameSuffix = safeString(flavorData["version_name_suffix"]),
-                versionCode = safeInt(flavorData["version_code"] ?: defaults["version_code"])
+                versionCode = safeInt(flavorData["version_code"] ?: defaults["version_code"]),
+                firebase = processFirebaseData(flavorData["firebase"], defaults["firebase"]),
             )
         }
+    }
+
+    private fun processFirebaseData(flavorFirebase: Any?, defaultFirebase: Any?): AnnaiFirebase? {
+
+        var releaseFile: String? = null;
+        var debugFile: String? = null;
+        var profileFile: String? = null;
+
+        var firebase = defaultFirebase as? Map<String, Any> ?: emptyMap()
+
+        if(firebase.isNotEmpty()) {
+            var firebaseBuildType = firebase["release"] as? Map<String, Any> ?: emptyMap()
+            if (firebaseBuildType.isNotEmpty()) {
+                releaseFile = firebaseBuildType["file"] as? String?
+            }
+            firebaseBuildType = firebase["debug"] as? Map<String, Any> ?: emptyMap()
+            if (firebaseBuildType.isNotEmpty()) {
+                debugFile = firebaseBuildType["file"] as? String?
+            }
+            firebaseBuildType = firebase["profile"] as? Map<String, Any> ?: emptyMap()
+            if (firebaseBuildType.isNotEmpty()) {
+                profileFile = firebaseBuildType["file"] as? String?
+            }
+        }
+
+        firebase = flavorFirebase as? Map<String, Any> ?: emptyMap()
+
+        if(firebase.isNotEmpty()) {
+            var firebaseBuildType = firebase["release"] as? Map<String, Any> ?: emptyMap()
+            if (firebaseBuildType.isNotEmpty()) {
+                releaseFile = firebaseBuildType["file"] as? String?
+            }
+            firebaseBuildType = firebase["debug"] as? Map<String, Any> ?: emptyMap()
+            if (firebaseBuildType.isNotEmpty()) {
+                debugFile = firebaseBuildType["file"] as? String?
+            }
+            firebaseBuildType = firebase["profile"] as? Map<String, Any> ?: emptyMap()
+            if (firebaseBuildType.isNotEmpty()) {
+                profileFile = firebaseBuildType["file"] as? String?
+            }
+        }
+
+        if(releaseFile == null && debugFile == null && profileFile == null) {
+            return null
+        }
+
+        return AnnaiFirebase(
+            releaseFile = releaseFile,
+            debugFile = debugFile,
+            profileFile = profileFile,
+        )
     }
 
     fun determineCurrentFlavor() {
@@ -138,11 +190,29 @@ data class AnnaiFlavor(
     var idSuffix: String = "",
     var versionName: String,
     var versionNameSuffix: String = "",
-    var versionCode: Int
+    var versionCode: Int,
+    var firebase: AnnaiFirebase?,
 ) {
     val finalId: String
         get() = id + idSuffix
 
     val finalVersionName: String
         get() = versionName + versionNameSuffix
+}
+
+data class AnnaiFirebase(
+    var releaseFile: String?,
+    var debugFile: String?,
+    var profileFile: String?,
+) {
+    fun getFile(buildType: String): String? {
+        return when (buildType.lowercase()) {
+            "release" -> releaseFile
+            "debug" -> debugFile.takeIf { !it.isNullOrBlank() } ?: releaseFile
+            "profile" -> profileFile.takeIf { !it.isNullOrBlank() }
+                ?: debugFile.takeIf { !it.isNullOrBlank() }
+                ?: releaseFile
+            else -> throw IllegalArgumentException("❌ Unknown build type: $buildType")
+        }
+    }
 }

@@ -23,7 +23,6 @@ abstract class PreBuildProcessingTask : DefaultTask() {
         println("⚙️ $pluginName Pre-Build Processing: Started...")
 
         specUtil.determineCurrentFlavor()
-
         specUtil.printFlavorInfo()
     }
 }
