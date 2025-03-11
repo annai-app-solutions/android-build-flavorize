@@ -3,7 +3,7 @@ import java.io.FileInputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 
-val rootDir = "../../"
+val rootDir =  "${project.projectDir}/../../../"
 val annaiDataDir = "$rootDir/annai_app_data/keys/mavencentral"
 
 // Load external gradle.properties (for Sonatype credentials & signing keys)
