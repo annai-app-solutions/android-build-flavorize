@@ -4,11 +4,11 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 val rootDir = "../../"
-val annaiDataDir = "$rootDir/annai_app_data"
+val annaiDataDir = "$rootDir/annai_app_data/keys/mavencentral"
 
 // Load external gradle.properties (for Sonatype credentials & signing keys)
 val externalProperties = Properties()
-val externalPropertiesFile = file("$annaiDataDir/keys/mavencentral/gradle.properties")
+val externalPropertiesFile = file("$annaiDataDir/gradle.properties")
 
 if (externalPropertiesFile.exists()) {
     externalProperties.load(FileInputStream(externalPropertiesFile))
@@ -119,21 +119,26 @@ signing {
         var keyFile = file(signingKeyFile)
 
         if (!keyFile.exists()) {
-            keyFile = file("$annaiDataDir/$signingKeyFile/")
+            keyFile = File(annaiDataDir, signingKeyFile)
         }
 
         if (!keyFile.exists()) {
-            throw GradleException("❌ Signing key file not found: $signingKeyFile")
+            throw GradleException("❌ Signing key file not found: ${keyFile.absolutePath}")
         }
 
-        val signingKey = keyFile.readText()
+        val signingKey = keyFile.readText().trim()
+
+        if (signingKey.isBlank()) {
+            throw GradleException("❌ Signing key file is empty: ${keyFile.absolutePath}")
+        }
+
         useInMemoryPgpKeys(signingKey, signingPassword)
 
         publishing.publications.withType<MavenPublication>().configureEach {
             sign(this)
         }
     } else {
-        println("⚠️ Signing skipped: GPG key file or password missing in gradle.properties")
+        println("⚠️ Signing skipped: Missing signing key file or password in gradle.properties")
     }
 }
 
