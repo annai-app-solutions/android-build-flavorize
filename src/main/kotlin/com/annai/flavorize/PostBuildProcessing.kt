@@ -21,16 +21,18 @@ abstract class PostBuildProcessingTask : DefaultTask() {
     @TaskAction
     fun executePostBuild() {
 
-        // Retrieve file path from extra properties
-        val destinationFilePath = project.extensions.extraProperties["firebaseDestinationFile"] as? String
+        if (project.extensions.extraProperties.has("firebaseDestinationFile")) {
+            // Retrieve file path from extra properties
+            val destinationFilePath = project.extensions.extraProperties["firebaseDestinationFile"] as? String?
 
-        if (destinationFilePath != null) {
-            val destinationFile = File(destinationFilePath)
-            if (destinationFile.exists()) {
-                destinationFile.delete()
-                println("🗑️ Firebase Configuration File Deleted: ${destinationFile.absolutePath}")
-            } else {
-                println("⚠️ Firebase Configuration File not found for deletion.")
+            if (!destinationFilePath.isNullOrBlank()) {
+                val destinationFile = File(destinationFilePath)
+                if (destinationFile.exists()) {
+                    destinationFile.delete()
+                    println("🗑️ Firebase Configuration File Deleted: ${destinationFile.absolutePath}")
+                } else {
+                    println("⚠️ firebaseDestinationFile property is empty or null.")
+                }
             }
         }
 
