@@ -1,0 +1,29 @@
+package com.annai.flavorize.data.spec.app.firebase
+
+import com.annai.flavorize.utils.throwError
+
+data class AnnaiFirebaseData (
+    var release: FirebaseConfig? = null,
+    var debug: FirebaseConfig? = null,
+    var profile: FirebaseConfig? = null,
+) {
+
+    fun getConfigFile(buildType: String): String? {
+        return when (buildType.lowercase()) {
+            "release" -> release?.file
+            "debug" -> debug?.file.takeIf { !it.isNullOrBlank() } ?: release?.file
+            "profile" -> profile?.file.takeIf { !it.isNullOrBlank() }
+                ?: debug?.file.takeIf { !it.isNullOrBlank() }
+                ?: release?.file
+            else -> throwError("Unknown build type: $buildType", IllegalArgumentException::class)
+        }
+    }
+}
+
+data class FirebaseConfig (
+    var project_id: String? = null,
+    var google_app_id: String? = null,
+    var file: String? = null,
+    //var firebase_options: FirebaseOptions? = null,
+)
+

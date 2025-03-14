@@ -23,29 +23,34 @@ plugins {
     `maven-publish`       // For publishing to Maven repositories
     signing               // Required for Maven Central publishing
     id("java-gradle-plugin")
+
 }
 
-group = "com.annaibrands.studio"
+group = "com.annaibrands.android"
 version = "1.0.0"
 
-
 repositories {
+    gradlePluginPortal()
     google()
     mavenCentral()
 }
 
 dependencies {
+
     implementation(gradleApi())
     implementation(localGroovy())
-    testImplementation(kotlin("test"))
-    implementation("com.android.tools.build:gradle:8.1.1")
+
+    implementation("com.android.tools.build:gradle:8.2.0")
+
     implementation("org.yaml:snakeyaml:2.0")
+
+    testImplementation(kotlin("test"))
 }
 
 gradlePlugin {
     plugins {
         create("flavorizePlugin") {
-            id = "com.annaibrands.studio.flavorize"
+            id = "com.annaibrands.android.flavorize"
             implementationClass = "com.annai.flavorize.FlavorizePlugin"
         }
     }

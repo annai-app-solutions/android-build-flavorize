@@ -1,8 +1,13 @@
 package com.annai.flavorize
 
+import com.android.build.api.variant.AndroidComponentsExtension
 import com.annai.flavorize.spec.AnnaiSpecUtil
-import com.annai.flavorize.utils.capitalizeFirstChar
 import com.android.build.gradle.AppExtension
+import com.annai.flavorize.tasks.AnnaiBuildConfigurator
+import com.annai.flavorize.tasks.FirebaseCopyTask
+import com.annai.flavorize.tasks.PostBuildProcessingTask
+import com.annai.flavorize.tasks.PreBuildProcessingTask
+import com.annai.flavorize.utils.*
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -10,6 +15,11 @@ class FlavorizePlugin : Plugin<Project> {
     override fun apply(project: Project) {
 
         val specUtil = AnnaiSpecUtil(project)
+        val enabled = specUtil.config?.enabled ?: true
+
+        if(!enabled)  return
+        
+        debugEnable = specUtil.config?.debug?.printDebug ?: false
 
         // ✅ Register AnnaiSpecUtil as an extension for Gradle scripts
         project.extensions.add("annaiSpec", specUtil)
@@ -18,17 +28,31 @@ class FlavorizePlugin : Plugin<Project> {
         val extraProperties = project.rootProject.extensions.extraProperties
         extraProperties.set("annaiSpec", specUtil)
 
-        // ✅ Debugging: Print available extensions to ensure AnnaiSpecUtil is registered
-        //project.extensions.extensionsSchema.forEach {
-            //println("📢 Available Extension: ${it.name} -> ${it.publicType}")
-        //}
-
+        // ✅ Get the Android Components API
+        val androidComponents = project.extensions.findByType(AndroidComponentsExtension::class.java)
         val android = project.extensions.findByType(AppExtension::class.java)
 
-        if (android == null) {
-            println("⚠️ Android Gradle Plugin not found! Make sure this plugin is applied in an Android project.")
-            return
+        if (androidComponents == null || android == null) {
+            throwError("Android Gradle Plugin not found! Make sure this plugin is applied in an Android project.")
         }
+
+        if (specUtil.config != null) {
+            // ✅ Configure flavors and build types at the **correct lifecycle stage**
+            androidComponents.finalizeDsl { extension ->
+                printDebug("Configuring AnnaiBuildConfigurator BEFORE AGP finalizes DSL")
+                AnnaiBuildConfigurator(project).configure(specUtil.config!!)
+            }
+        } else {
+            printWarning("Android Components Extension not found! Ensure AGP is applied before this plugin.")
+        }
+
+        // ✅ Debugging: Print available extensions to ensure AnnaiSpecUtil is registered
+        if(debugEnable) {
+            project.extensions.extensionsSchema.forEach {
+                printDebug("Available Extension: ${it.name} -> ${it.publicType}")
+            }
+        }
+
 
          android.applicationVariants.all { variant ->
             val flavor = variant.flavorName?.capitalizeFirstChar() ?: "NoFlavor"
@@ -53,7 +77,7 @@ class FlavorizePlugin : Plugin<Project> {
              }.configureEach { task ->
                     if (!task.dependsOn.contains(firebaseCopyTask)) {
                         task.dependsOn(firebaseCopyTask)
-                        //println("📢 FirebaseCopyTask added before: ${task.name}")
+                        printDebug("FirebaseCopyTask added before: ${task.name}")
                     }
                 }
 
@@ -62,7 +86,7 @@ class FlavorizePlugin : Plugin<Project> {
             }.configureEach { task ->
                 task.dependsOn(preBuildTask)
                 task.finalizedBy(postBuildTask)
-                //println("📢 Pre & Post build task added before: ${task.name}")
+                printDebug("Pre & Post build task added before: ${task.name}")
             }
         }
     }

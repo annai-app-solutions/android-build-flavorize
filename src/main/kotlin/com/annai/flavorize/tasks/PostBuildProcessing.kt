@@ -1,4 +1,4 @@
-package com.annai.flavorize
+package com.annai.flavorize.tasks
 
 import com.annai.flavorize.spec.AnnaiSpecUtil
 import org.gradle.api.DefaultTask
@@ -31,7 +31,7 @@ abstract class PostBuildProcessingTask : DefaultTask() {
                     destinationFile.delete()
                     println("🗑️ Firebase Configuration File Deleted: ${destinationFile.absolutePath}")
                 } else {
-                    println("⚠️ firebaseDestinationFile property is empty or null.")
+                    printWarning("firebaseDestinationFile property is empty or null.")
                 }
             }
         }
