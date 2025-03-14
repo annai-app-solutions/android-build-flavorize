@@ -59,6 +59,9 @@ class AnnaiBuildConfigurator(private val project: Project) {
                         it.resValue("string", "app_name", flavor.finalName)
                         it.versionName = flavor.finalVersionName
                         it.versionCode = flavor.version_code
+                        if(flavor.gms_ads_id != null) {
+                            it.resValue("string", "gms_ads_id", flavor.gms_ads_id!!)
+                        }
                     }
                 }
             }

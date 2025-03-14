@@ -18,6 +18,28 @@ data class AnnaiFirebaseData (
             else -> throwError("Unknown build type: $buildType", IllegalArgumentException::class)
         }
     }
+
+    fun getConfigGoogleAppId(buildType: String): String? {
+        return when (buildType.lowercase()) {
+            "release" -> release?.google_app_id
+            "debug" -> debug?.google_app_id.takeIf { !it.isNullOrBlank() } ?: release?.google_app_id
+            "profile" -> profile?.google_app_id.takeIf { !it.isNullOrBlank() }
+                ?: debug?.google_app_id.takeIf { !it.isNullOrBlank() }
+                ?: release?.google_app_id
+            else -> throwError("Unknown build type: $buildType", IllegalArgumentException::class)
+        }
+    }
+
+    fun getConfigProjectId(buildType: String): String? {
+        return when (buildType.lowercase()) {
+            "release" -> release?.project_id
+            "debug" -> debug?.project_id.takeIf { !it.isNullOrBlank() } ?: release?.project_id
+            "profile" -> profile?.project_id.takeIf { !it.isNullOrBlank() }
+                ?: debug?.project_id.takeIf { !it.isNullOrBlank() }
+                ?: release?.project_id
+            else -> throwError("Unknown build type: $buildType", IllegalArgumentException::class)
+        }
+    }
 }
 
 data class FirebaseConfig (
