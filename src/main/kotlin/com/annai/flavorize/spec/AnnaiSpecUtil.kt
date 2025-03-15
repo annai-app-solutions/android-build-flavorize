@@ -13,21 +13,27 @@ import java.io.File
 
 class AnnaiSpecUtil(private val project: Project) {
 
-    private val annaiSpecFile: String = "annaispec.yaml"
+    private val rootPath: String
     private val yamlFile: File
+    private val annaiSpecFile: String = "annaispec.yaml"
+    private val pubSpecFile: String = "pubspec.yaml"
 
     var currentFlavor: AnnaiAndroidFlavor? = null
     var buildType: String = "debug"
     var config: AnnaiSpecData? = null
 
     init {
-        val isFlutterProject = File(project.rootProject.projectDir, "pubspec.yaml").exists()
 
-        yamlFile = if (isFlutterProject) {
-            File(project.rootProject.projectDir, annaiSpecFile)
+        val flutterRoot = File(project.rootProject.projectDir.parentFile, pubSpecFile)
+        val isFlutterProject = flutterRoot.exists()
+
+        rootPath = if (isFlutterProject) {
+            project.rootProject.projectDir.parentFile.canonicalPath // Move to Flutter root
         } else {
-            File(project.rootProject.projectDir, "android/$annaiSpecFile")
+            project.rootProject.projectDir.canonicalPath // Native Android project
         }
+
+        yamlFile = File(rootPath, annaiSpecFile)
 
         config = getDataFile(yamlFile)?.apply {
             annai_app.mergeDefaults()
