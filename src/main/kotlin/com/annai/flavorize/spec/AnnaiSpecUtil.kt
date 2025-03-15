@@ -13,32 +13,38 @@ import java.io.File
 
 class AnnaiSpecUtil(private val project: Project) {
 
-    private val rootPath = File(project.rootProject.projectDir, "../").canonicalPath
-    private val yamlFile = File(rootPath, "annaispec.yaml")
+    private val annaiSpecFile: String = "annaispec.yaml"
+    private val yamlFile: File
 
     var currentFlavor: AnnaiAndroidFlavor? = null
     var buildType: String = "debug"
-
     var config: AnnaiSpecData? = null
 
     init {
-        config = getDataFile(yamlFile).also {
-            it.annai_app.apply {
-                mergeDefaults()
-                validate()
-            }
+        val isFlutterProject = File(project.rootProject.projectDir, "pubspec.yaml").exists()
+
+        yamlFile = if (isFlutterProject) {
+            File(project.rootProject.projectDir, annaiSpecFile)
+        } else {
+            File(project.rootProject.projectDir, "android/$annaiSpecFile")
+        }
+
+        config = getDataFile(yamlFile)?.apply {
+            annai_app.mergeDefaults()
+            annai_app.validate()
         }
     }
 
-    private fun getDataFile(annaiSpecFile: File): AnnaiSpecData {
+    private fun getDataFile(annaiSpecFile: File): AnnaiSpecData? {
         if (!annaiSpecFile.exists()) {
-            throwError("Missing annaispec.yaml file at ${annaiSpecFile.canonicalPath}")
+            printWarning("Missing $annaiSpecFile file at ${annaiSpecFile.canonicalPath}")
+            return null
         }
         return try {
             AnnaiFileUtils.loadYaml(annaiSpecFile.canonicalPath, AnnaiSpecData::class.java)
         } catch (exception: Exception) {
             println(exception.printStackTrace())
-            throwError("Error reading annaispec.yaml: ${exception.message}", GradleException::class, exception)
+            throwError("Error reading $annaiSpecFile: ${exception.message}", GradleException::class, exception)
         }
     }
 
@@ -60,8 +66,8 @@ class AnnaiSpecUtil(private val project: Project) {
             .firstOrNull { type -> requestedTasks.any { it.contains(type, ignoreCase = true) } }
             ?: "debug"
 
-        printDebug("📢 Detected Flavor: $detectedFlavor")
-        printDebug("📢 Detected buildType: $buildType")
+        printDebug("Detected Flavor: $detectedFlavor")
+        printDebug("Detected buildType: $buildType")
 
         currentFlavor = detectedFlavor?.let { flavors[it] }
 
@@ -83,18 +89,18 @@ class AnnaiSpecUtil(private val project: Project) {
             determineCurrentFlavor()
         }
 
-        println("Build Information")
+        println("🛠 **Build Information** 🛠")
         if (currentFlavor != null) {
             val it = currentFlavor!!
-            println("\t🔹 Flavor: ${it.flavorName}")
             println("\t🔹 Build Type: $buildType")
+            println("\t🔹 Flavor: ${it.flavorName}")
             println("\t🔹 App Name: ${it.finalName}")
             println("\t🔹 App ID: ${it.finalId}")
             println("\t🔹 Version Name: ${it.finalVersionName}")
             println("\t🔹 Version Code: ${it.version_code}")
         }  else {
-            printWarning("No flavor detected...")
             println("\t🔹 Build Type: $buildType")
+            println("\t🔹 No flavor detected...")
         }
     }
 
@@ -111,7 +117,7 @@ class AnnaiSpecUtil(private val project: Project) {
             val targetSdk = androidExtension.defaultConfig.targetSdk ?: "Unknown"
             val compileSdk = androidExtension.compileSdk ?: "Unknown"
 
-            println("SDK Information")
+            println("🛠 **SDK Information** 🛠")
             println("\t🔹 minSdk: $minSdk")
             println("\t🔹 targetSdk: $targetSdk")
             println("\t🔹 compileSdk: $compileSdk")
