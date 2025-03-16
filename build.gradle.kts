@@ -3,8 +3,8 @@ import java.io.FileInputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 
-val rootDir =  "${project.projectDir}/../../../"
-val annaiDataDir = "$rootDir/annai_app_data/keys/mavencentral"
+val rootDir : String = project.projectDir.resolve("../../../").canonicalPath
+val annaiDataDir: String = File(rootDir, "annai_app_data/keys/mavencentral").canonicalPath
 
 // Load external gradle.properties (for Sonatype credentials & signing keys)
 val externalProperties = Properties()
@@ -15,15 +15,17 @@ if (externalPropertiesFile.exists()) {
     externalProperties.forEach { key, value ->
         project.extensions.extraProperties[key.toString()] = value
     }
+} else {
+    println("⚠️ Jetbrains gradle.properties not found in ${externalPropertiesFile.canonicalPath}")
 }
 
 plugins {
     kotlin("jvm") version "2.1.10"
+    id("java")
     `java-gradle-plugin`  // Required for creating Gradle plugins
     `maven-publish`       // For publishing to Maven repositories
     signing               // Required for Maven Central publishing
     id("java-gradle-plugin")
-
 }
 
 group = "com.annaibrands.android"
@@ -39,6 +41,7 @@ dependencies {
 
     implementation(gradleApi())
     implementation(localGroovy())
+    implementation(kotlin("stdlib"))
 
     implementation("com.android.tools.build:gradle:8.2.0")
 
