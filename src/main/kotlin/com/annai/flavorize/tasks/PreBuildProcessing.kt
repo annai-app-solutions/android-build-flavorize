@@ -1,6 +1,5 @@
 package com.annai.flavorize.tasks
 
-import com.android.build.api.dsl.ApplicationExtension
 import com.annai.flavorize.spec.AnnaiSpecUtil
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Internal
@@ -26,5 +25,6 @@ abstract class PreBuildProcessingTask : DefaultTask() {
         specUtil.determineCurrentFlavor()
         specUtil.printFlavorInfo()
         specUtil.printSdkInfo()
+        specUtil.printReleaseBuildTypeInfo()
     }
 }

@@ -95,7 +95,7 @@ class AnnaiSpecUtil(private val project: Project) {
             determineCurrentFlavor()
         }
 
-        println("🛠 **Build Information** 🛠")
+        println("🛠 Build Information 🛠")
         if (currentFlavor != null) {
             val it = currentFlavor!!
             println("\t🔹 Build Type: $buildType")
@@ -123,10 +123,39 @@ class AnnaiSpecUtil(private val project: Project) {
             val targetSdk = androidExtension.defaultConfig.targetSdk ?: "Unknown"
             val compileSdk = androidExtension.compileSdk ?: "Unknown"
 
-            println("🛠 **SDK Information** 🛠")
+            println("🛠 SDK Information 🛠")
             println("\t🔹 minSdk: $minSdk")
             println("\t🔹 targetSdk: $targetSdk")
             println("\t🔹 compileSdk: $compileSdk")
+        } else {
+            printWarning("Android extension not found! Make sure this task is applied in an Android project.")
+        }
+    }
+
+    fun printReleaseBuildTypeInfo() {
+
+        if(config?.debug?.printReleaseBuildTypeInfo == false){
+            return
+        }
+
+        val androidExtension = project.extensions.findByType(ApplicationExtension::class.java)
+
+        if (androidExtension != null) {
+            val releaseBuild = androidExtension.buildTypes.getByName("release")
+            val isShrinkResources = releaseBuild.isShrinkResources
+            val isMinifyEnabled = releaseBuild.isMinifyEnabled
+            val ndkVersion = androidExtension.ndkVersion
+            val ndkDebugSymbolLevel = releaseBuild.ndk.debugSymbolLevel
+            val ndkAbiFilters = releaseBuild.ndk.abiFilters
+            val lintCheckReleaseBuilds = androidExtension.lint.checkReleaseBuilds
+
+            println("🛠 Release BuildType Information 🛠")
+            println("\t🔹 isShrinkResources: $isShrinkResources")
+            println("\t🔹 isMinifyEnabled: $isMinifyEnabled")
+            println("\t🔹 ndkVersion: $ndkVersion")
+            println("\t🔹 ndkDebugSymbolLevel: $ndkDebugSymbolLevel")
+            println("\t🔹 ndkAbiFilters: $ndkAbiFilters")
+            println("\t🔹 lintCheckReleaseBuilds: $lintCheckReleaseBuilds")
         } else {
             printWarning("Android extension not found! Make sure this task is applied in an Android project.")
         }

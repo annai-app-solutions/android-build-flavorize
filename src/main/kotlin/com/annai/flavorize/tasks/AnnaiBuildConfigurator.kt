@@ -113,21 +113,26 @@ class AnnaiBuildConfigurator(private val project: Project) {
 
     private fun configureBuildTypes(appData: AnnaiAndroid, androidExtension: ApplicationExtension) {
         androidExtension.apply {
-            ndkVersion = "27.0.12077973"
+            ndkVersion = appData.releaseBuildTypes?.ndkVersion ?: ndkVersion
 
             buildTypes {
                 getByName("release") {
-                    it.isShrinkResources = true
-                    it.isMinifyEnabled = true
-                    it.ndk.debugSymbolLevel = "FULL"
-                    it.ndk.abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86_64"))
+                    it.isShrinkResources = appData.releaseBuildTypes?.shrinkResources ?: it.isShrinkResources
+                    it.isMinifyEnabled = appData.releaseBuildTypes?.minifyEnabled ?: it.isMinifyEnabled
+
+                    it.ndk.debugSymbolLevel = appData.releaseBuildTypes?.ndkDebugSymbolLevel ?: it.ndk.debugSymbolLevel
+                    if (!appData.releaseBuildTypes?.ndkAbiFilters.isNullOrEmpty()) {
+                        it.ndk.abiFilters.clear()
+                        it.ndk.abiFilters.addAll(appData.releaseBuildTypes!!.ndkAbiFilters!!)
+                    }
                 }
             }
 
             lint {
-                checkReleaseBuilds = false
+                checkReleaseBuilds = appData.releaseBuildTypes?.lintCheckReleaseBuilds ?: checkReleaseBuilds
             }
-        }
+
+         }
     }
 
     private fun findValidFile(filePath: String): File? {

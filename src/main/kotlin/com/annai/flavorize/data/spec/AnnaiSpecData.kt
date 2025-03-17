@@ -10,8 +10,9 @@ data class AnnaiSpecData(
 
 data class AnnaiDebugData(
     var printDebug: Boolean = false,
-    var printSdkVersions: Boolean = true,
     var printBuildAndFlavorInfo: Boolean = true,
+    var printSdkVersions: Boolean = true,
+    var printReleaseBuildTypeInfo: Boolean = false,
 )
 
 data class AnnaiPubSpecConfig(

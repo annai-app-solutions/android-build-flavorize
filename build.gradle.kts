@@ -45,7 +45,7 @@ dependencies {
 
     implementation("com.android.tools.build:gradle:8.2.0")
 
-    implementation("org.yaml:snakeyaml:2.0")
+    implementation("org.yaml:snakeyaml:2.4")
 
     testImplementation(kotlin("test"))
 }

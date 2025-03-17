@@ -12,8 +12,6 @@ import com.annai.flavorize.data.merger.mergeWithDefault
 import com.annai.flavorize.data.spec.app.bundle.AnnaiAndroidKeysData
 import com.annai.flavorize.utils.throwError
 
-
-
 data class AnnaiAppData (
     var android: AnnaiAndroid? = null,
     var ios: AnnaiIos? = null,
@@ -39,6 +37,7 @@ data class AnnaiAppData (
 
 data class AnnaiAndroid (
     var sdk: AnnaiAndroidSdk? = null,
+    var releaseBuildTypes: AnnaiAndroidBuildType? = null,
     var default: AnnaiAndroidDefaultApp = AnnaiAndroidDefaultApp(),
     var flavor: Map<String, AnnaiAndroidFlavor>? = null,
 ) {
@@ -187,4 +186,13 @@ data class AnnaiAndroidSdk(
     var minSdk: Int? = null,
     var compileSdk: Int? = null,
     var targetSdk: Int? = null,
+)
+
+data class AnnaiAndroidBuildType (
+    var minifyEnabled: Boolean? = null,
+    var shrinkResources: Boolean? = null,
+    var ndkVersion: String? = null,
+    var ndkDebugSymbolLevel: String? = null,
+    var ndkAbiFilters: List<String>? = null,
+    var lintCheckReleaseBuilds: Boolean? = null,
 )
