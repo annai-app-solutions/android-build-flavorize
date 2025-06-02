@@ -1,6 +1,6 @@
 package com.annai.flavorize.tasks
 
-import com.annai.flavorize.data.spec.app.firebase.AnnaiFirebaseData
+import com.annai.flavorize.data.spec.app.firebase.AnnaiAndroidFirebaseData
 import com.annai.flavorize.spec.AnnaiSpecUtil
 import com.annai.flavorize.utils.printDebug
 import com.annai.flavorize.utils.printWarning
@@ -33,7 +33,7 @@ abstract class FirebaseCopyTask : DefaultTask() {
             ?: throwError("No valid flavor detected in Firebase Copy Task!")
 
 
-        val firebaseConfig : AnnaiFirebaseData? = specUtil.currentFlavor?.firebase
+        val firebaseConfig : AnnaiAndroidFirebaseData? = specUtil.currentFlavor?.firebase
         if(firebaseConfig == null) {
             printWarning("No Firebase configuration found for flavor: $flavor and buildType: $buildType")
             return
