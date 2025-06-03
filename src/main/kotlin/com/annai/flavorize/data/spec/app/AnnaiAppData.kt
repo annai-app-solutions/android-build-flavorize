@@ -21,24 +21,32 @@ data class AnnaiAppData (
     var ios: AnnaiIos? = null,
     var windows: AnnaiWindows? = null,
     var web: AnnaiWeb? = null,
+    var general: AnnaiGeneralData? = null,
 )
 {
     val isValid: Boolean
         get() = android?.isValid == true || ios?.isValid == true || windows?.isValid == true || web?.isValid == true
 
     fun validate(): Boolean {
-        if (android?.validate() == false) return false
-        if (ios?.validate() == false) return false
-        if (windows?.validate() == false) return false
-        if (web?.validate() == false) return false
+        // Ensure that if a platform is present, it's valid.
+        // It's not an error if a platform is null (not configured).
+        android?.validate() ?: true
+        ios?.validate() ?: true
+        windows?.validate() ?: true
+        web?.validate() ?: true
+        general?.validate() ?: true
         return true
     }
 
     fun mergeDefaults() {
+
+        general = general ?: AnnaiGeneralData()
+
         android?.mergeDefaults()
         ios?.mergeDefaults()
         windows?.mergeDefaults()
         web?.mergeDefaults()
+        general?.mergeDefaults()
     }
 }
 
@@ -52,8 +60,9 @@ data class AnnaiAndroid (
     val isValid: Boolean
         get()  {
             return if(flavor?.values?.isEmpty() == true) {
-                AnnaiDataUtils.isValidId(default.id)
-                        && AnnaiDataUtils.isValidVersionCode(default.version_code)
+                default.id != null && default.version_code != null &&
+                        AnnaiDataUtils.isValidId(default.id) &&
+                        AnnaiDataUtils.isValidVersionCode(default.version_code)
             } else {
                 flavor?.values?.all { it.isValid } ?: false
             }
@@ -67,9 +76,9 @@ data class AnnaiAndroid (
             if (!AnnaiDataUtils.isValidVersionCode(default.version_code)) {
                 throwError("Android default version_code is missing!", IllegalArgumentException::class)
             }
+        } else { // Only validate flavors if they exist and are not empty
+            flavor?.values?.forEach { it.validate() }
         }
-
-        flavor?.values?.forEach { it.validate() }
         return true
     }
 
@@ -88,8 +97,9 @@ data class AnnaiIos (
     val isValid: Boolean
         get()  {
             return if(flavor?.values?.isEmpty() == true) {
-                AnnaiDataUtils.isValidId(default.id)
-                        && AnnaiDataUtils.isValidVersionCode(default.version_code)
+                default.id != null && default.version_code != null &&
+                        AnnaiDataUtils.isValidId(default.id) &&
+                        AnnaiDataUtils.isValidVersionCode(default.version_code)
             } else {
                 flavor?.values?.all { it.isValid } ?: false
             }
@@ -103,9 +113,9 @@ data class AnnaiIos (
             if (!AnnaiDataUtils.isValidVersionCode(default.version_code)) {
                 throwError("iOS default version_code is missing!", IllegalArgumentException::class)
             }
+        } else { // Only validate flavors if they exist and are not empty
+            flavor?.values?.forEach { it.validate() }
         }
-
-        flavor?.values?.forEach { it.validate() }
         return true
     }
 
@@ -124,8 +134,9 @@ data class AnnaiWeb (
     val isValid: Boolean
         get()  {
             return if(flavor?.values?.isEmpty() == true) {
-                AnnaiDataUtils.isValidId(default.id)
-                        && AnnaiDataUtils.isValidVersionCode(default.version_code)
+                default.id != null && default.version_code != null &&
+                        AnnaiDataUtils.isValidId(default.id) &&
+                        AnnaiDataUtils.isValidVersionCode(default.version_code)
             } else {
                 flavor?.values?.all { it.isValid } ?: false
             }
@@ -139,9 +150,9 @@ data class AnnaiWeb (
             if (!AnnaiDataUtils.isValidVersionCode(default.version_code)) {
                 throwError("Web default version_code is missing!", IllegalArgumentException::class)
             }
+        } else { // Only validate flavors if they exist and are not empty
+            flavor?.values?.forEach { it.validate() }
         }
-
-        flavor?.values?.forEach { it.validate() }
         return true
     }
 
@@ -160,8 +171,9 @@ data class AnnaiWindows (
     val isValid: Boolean
         get()  {
             return if(flavor?.values?.isEmpty() == true) {
-                AnnaiDataUtils.isValidId(default.id)
-                        && AnnaiDataUtils.isValidVersionCode(default.version_code)
+                default.id != null && default.version_code != null &&
+                        AnnaiDataUtils.isValidId(default.id) &&
+                        AnnaiDataUtils.isValidVersionCode(default.version_code)
             } else {
                 flavor?.values?.all { it.isValid } ?: false
             }
@@ -175,9 +187,9 @@ data class AnnaiWindows (
             if (!AnnaiDataUtils.isValidVersionCode(default.version_code)) {
                 throwError("Windows default version_code is missing!", IllegalArgumentException::class)
             }
+        } else { // Only validate flavors if they exist and are not empty
+            flavor?.values?.forEach { it.validate() }
         }
-
-        flavor?.values?.forEach { it.validate() }
         return true
     }
 
@@ -213,7 +225,7 @@ data class AnnaiIosDefaultApp (
     var firebase: AnnaiIosFirebaseData? = null,
     var in_app_subscription: List<AnnaiInAppSubscription>? = null,
     var fastlane: FastlaneIosData? = null,
-    )
+)
 
 data class AnnaiWindowsDefaultApp (
     var id: String? = null,
@@ -249,3 +261,24 @@ data class AnnaiAndroidBuildType (
     var ndkAbiFilters: List<String>? = null,
     var lintCheckReleaseBuilds: Boolean? = null,
 )
+
+data class AnnaiGeneralData(
+    var firebase_token_file: String? = null,
+) {
+    val isValid: Boolean
+        get() {
+            return true
+        }
+
+    fun validate(): Boolean {
+
+        return true
+    }
+
+    fun mergeDefaults() {
+        // No nested data classes or complex merging logic needed here currently.
+        // If 'firebase_token_file' were to have a default value if not specified in YAML,
+        // it would be handled like this:
+        firebase_token_file = firebase_token_file ?: "firebase_tokens.properties"
+    }
+}
