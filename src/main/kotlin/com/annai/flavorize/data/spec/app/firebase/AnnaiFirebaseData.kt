@@ -84,8 +84,8 @@ interface PlatformFirebaseData<T : FirebaseConfigBase> {
             else -> throwError("Unknown build type: $buildType", IllegalArgumentException::class)
         }
         // Only return path if the config type supports it
-        return if (config is AndroidFirebaseConfig) config.path + "/google-services.json"
-        else if (config is IosFirebaseConfig) config.path + "/GoogleService-Info.plist"
+        return if (config is AndroidFirebaseConfig && !config.path.isNullOrEmpty()) config.path + "/google-services.json"
+        else if (config is IosFirebaseConfig && !config.path.isNullOrEmpty()) config.path + "/GoogleService-Info.plist"
         else null // Windows and Web do not have 'path'
     }
 
