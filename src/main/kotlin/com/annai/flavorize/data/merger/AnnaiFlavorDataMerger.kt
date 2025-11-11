@@ -31,6 +31,7 @@ fun AnnaiAndroidFlavor.mergeWithDefault(default: AnnaiAndroidDefaultApp, flavorN
     // Call the specific Android Firebase merger
     this.firebase = this.firebase?.mergeWithDefault(default.firebase) ?: default.firebase
     this.in_app_subscription = this.in_app_subscription ?: default.in_app_subscription
+    this.auth = this.auth ?: default.auth
     this.flavorName = flavorName
 }
 
@@ -46,6 +47,7 @@ fun AnnaiIosFlavor.mergeWithDefault(default: AnnaiIosDefaultApp, flavorName: Str
     // Call the specific iOS Firebase merger
     this.firebase = this.firebase?.mergeWithDefault(default.firebase) ?: default.firebase
     this.in_app_subscription = this.in_app_subscription ?: default.in_app_subscription
+    this.auth = this.auth ?: default.auth
     this.flavorName = flavorName
 }
 
@@ -59,6 +61,7 @@ fun AnnaiWebFlavor.mergeWithDefault(default: AnnaiWebDefaultApp, flavorName: Str
     // Call the specific Web Firebase merger
     this.firebase = this.firebase?.mergeWithDefault(default.firebase) ?: default.firebase
     this.in_app_subscription = this.in_app_subscription ?: default.in_app_subscription
+    this.auth = this.auth ?: default.auth
     this.flavorName = flavorName
 }
 
@@ -72,7 +75,9 @@ fun AnnaiWindowsFlavor.mergeWithDefault(default: AnnaiWindowsDefaultApp, flavorN
     // Call the specific Windows Firebase merger
     this.firebase = this.firebase?.mergeWithDefault(default.firebase) ?: default.firebase
     this.in_app_subscription = this.in_app_subscription ?: default.in_app_subscription
+    this.auth = this.auth ?: default.auth
     this.flavorName = flavorName
+
 }
 
 // --- Platform-Specific Firebase Data Mergers ---

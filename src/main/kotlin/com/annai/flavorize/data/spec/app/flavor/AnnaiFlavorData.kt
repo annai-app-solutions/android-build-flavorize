@@ -4,6 +4,7 @@ import com.annai.flavorize.data.spec.app.firebase.AnnaiAndroidFirebaseData
 import com.annai.flavorize.data.spec.app.firebase.AnnaiIosFirebaseData
 import com.annai.flavorize.data.spec.app.firebase.AnnaiWebFirebaseData
 import com.annai.flavorize.data.spec.app.firebase.AnnaiWindowsFirebaseData
+import com.annai.flavorize.data.spec.app.inapp.AnnaiAuthData
 import com.annai.flavorize.data.spec.app.inapp.AnnaiInAppSubscription
 import com.annai.flavorize.spec.AnnaiDataUtils
 import com.annai.flavorize.utils.throwError
@@ -21,7 +22,9 @@ data class AnnaiAndroidFlavor (
     var gms_ads_id: String? = null,
     var firebase: AnnaiAndroidFirebaseData? = null,
     var in_app_subscription: List<AnnaiInAppSubscription>? = null,
-) {
+    var auth: AnnaiAuthData? = null,
+
+    ) {
 
     var flavorName: String? = null
 
@@ -65,7 +68,9 @@ data class AnnaiIosFlavor (
     var gms_ads_id: String? = null,
     var firebase: AnnaiIosFirebaseData? = null,
     var in_app_subscription: List<AnnaiInAppSubscription>? = null,
-) {
+    var auth: AnnaiAuthData? = null,
+
+    ) {
     var flavorName: String? = null
 
     val isValid: Boolean
@@ -106,7 +111,9 @@ data class AnnaiWebFlavor (
     var main_file: String? = null,
     var firebase: AnnaiWebFirebaseData? = null,
     var in_app_subscription: List<AnnaiInAppSubscription>? = null,
-) {
+    var auth: AnnaiAuthData? = null,
+
+    ) {
     var flavorName: String? = null
 
     val isValid: Boolean
@@ -148,7 +155,9 @@ data class AnnaiWindowsFlavor (
     var main_file: String? = null,
     var firebase: AnnaiWindowsFirebaseData? = null,
     var in_app_subscription: List<AnnaiInAppSubscription>? = null,
-) {
+    var auth: AnnaiAuthData? = null,
+
+    ) {
     var flavorName: String? = null
 
     val isValid: Boolean

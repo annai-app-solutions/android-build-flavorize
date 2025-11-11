@@ -14,6 +14,7 @@ import com.annai.flavorize.data.spec.app.firebase.AnnaiIosFirebaseData
 import com.annai.flavorize.data.spec.app.firebase.AnnaiWebFirebaseData
 import com.annai.flavorize.data.spec.app.firebase.AnnaiWindowsFirebaseData
 import com.annai.flavorize.data.spec.app.flavor.AnnaiWindowsFlavor
+import com.annai.flavorize.data.spec.app.inapp.AnnaiAuthData
 import com.annai.flavorize.utils.throwError
 
 data class AnnaiAppData (
@@ -212,6 +213,7 @@ data class AnnaiAndroidDefaultApp (
     var firebase: AnnaiAndroidFirebaseData? = null,
     var in_app_subscription: List<AnnaiInAppSubscription>? = null,
     var fastlane: FastlaneAndroidData? = null,
+    var auth: AnnaiAuthData? = null,
 )
 
 data class AnnaiIosDefaultApp (
@@ -225,7 +227,8 @@ data class AnnaiIosDefaultApp (
     var firebase: AnnaiIosFirebaseData? = null,
     var in_app_subscription: List<AnnaiInAppSubscription>? = null,
     var fastlane: FastlaneIosData? = null,
-)
+    var auth: AnnaiAuthData? = null,
+    )
 
 data class AnnaiWindowsDefaultApp (
     var id: String? = null,
@@ -235,6 +238,7 @@ data class AnnaiWindowsDefaultApp (
     var main_file: String? = null,
     var firebase: AnnaiWindowsFirebaseData? = null,
     var in_app_subscription: List<AnnaiInAppSubscription>? = null,
+    var auth: AnnaiAuthData? = null,
 )
 
 data class AnnaiWebDefaultApp (
@@ -245,6 +249,7 @@ data class AnnaiWebDefaultApp (
     var main_file: String? = null,
     var firebase: AnnaiWebFirebaseData? = null,
     var in_app_subscription: List<AnnaiInAppSubscription>? = null,
+    var auth: AnnaiAuthData? = null,
 )
 
 data class AnnaiAndroidSdk(
