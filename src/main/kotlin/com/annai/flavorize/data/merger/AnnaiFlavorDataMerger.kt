@@ -44,6 +44,7 @@ fun AnnaiIosFlavor.mergeWithDefault(default: AnnaiIosDefaultApp, flavorName: Str
     this.main_file = this.main_file ?: default.main_file
     this.apple_id = this.apple_id ?: default.apple_id
     this.gms_ads_id = this.gms_ads_id ?: default.gms_ads_id
+    this.team_id = this.team_id ?: default.team_id
     // Call the specific iOS Firebase merger
     this.firebase = this.firebase?.mergeWithDefault(default.firebase) ?: default.firebase
     this.in_app_subscription = this.in_app_subscription ?: default.in_app_subscription

@@ -224,6 +224,7 @@ data class AnnaiIosDefaultApp (
     var main_file: String? = null,
     var apple_id: String? = null,
     var gms_ads_id: String? = null,
+    var team_id: String? = null,
     var firebase: AnnaiIosFirebaseData? = null,
     var in_app_subscription: List<AnnaiInAppSubscription>? = null,
     var fastlane: FastlaneIosData? = null,
